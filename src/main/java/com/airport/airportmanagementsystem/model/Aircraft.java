@@ -18,4 +18,6 @@ public class Aircraft {
 
     @Min(value = 1, message = "Capacity needs to be at least 1")
     private int capacity;
+
+    private String planeNo;
 }

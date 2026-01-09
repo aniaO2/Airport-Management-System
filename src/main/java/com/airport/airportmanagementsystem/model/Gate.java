@@ -1,4 +1,20 @@
 package com.airport.airportmanagementsystem.model;
 
-public class Gate{
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Entity
+@Table(name = "gates")
+@Data
+public class Gate {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @NotBlank(message = "Gate number is mandatory")
+    private String gateNo;
+
+    private String terminal;
 }

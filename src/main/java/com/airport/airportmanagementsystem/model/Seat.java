@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import lombok.Getter;
 
 @Entity
 @Table(name = "seats")
@@ -21,5 +22,6 @@ public class Seat {
 
     @ManyToOne
     @JoinColumn(name = "flight_id")
+    @Getter
     private Flight flight;
 }

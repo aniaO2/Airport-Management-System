@@ -26,4 +26,22 @@ public class FlightService {
     public List<Flight> getAllFlights(){
         return flightRepository.findAll();
     }
+
+    public Flight getFlightById(Integer id){
+        return flightRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Flight with id " + id + " not found"));
+    }
+
+    public void deleteFlight(Integer id){
+        if(!flightRepository.existsById(id)){
+            throw new RuntimeException("Flight not found, cannot delete.");
+        }
+        flightRepository.deleteById(id);
+    }
+
+    public List<Flight> findByDestination(String city){
+        return flightRepository.findAll().stream()
+                .filter(f -> f.getArrivalCity().equalsIgnoreCase(city))
+                .toList();
+    }
 }

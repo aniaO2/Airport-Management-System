@@ -24,4 +24,20 @@ public class FlightController {
     public Flight create(@Valid @RequestBody Flight flight){
         return flightService.saveFlight(flight);
     }
+
+    @GetMapping("/{id}")
+    public Flight getById(@PathVariable Integer id){
+        return flightService.getFlightById(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public String delete(@PathVariable Integer id){
+        flightService.deleteFlight(id);
+        return "Flight with id" + id + "was deleted successfully.";
+    }
+
+    @GetMapping("/search")
+    public List<Flight> searchByDestination(@RequestParam String city){
+        return flightService.findByDestination(city);
+    }
 }

@@ -11,7 +11,7 @@ import lombok.Data;
 public class Aircraft {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer aircraftId;
 
     @NotBlank(message = "Model is mandatory")
     private String model;

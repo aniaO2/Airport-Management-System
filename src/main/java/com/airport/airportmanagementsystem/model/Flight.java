@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class Flight {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer flightId;
 
     @NotBlank(message = "The flight no. is mandatory")
     private String flightNo;

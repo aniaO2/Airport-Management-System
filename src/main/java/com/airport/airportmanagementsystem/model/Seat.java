@@ -11,7 +11,7 @@ import lombok.Data;
 public class Seat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer seatId;
 
     @NotBlank(message = "Seat number is mandatory")
     private String seatNo;

@@ -14,6 +14,12 @@ public class FlightService {
     private FlightRepository flightRepository;
 
     public Flight saveFlight(Flight flight){
+        if(flight.getArrivalTime().isBefore(flight.getDepartureTime())){
+            throw new RuntimeException("Arrival time has to be after departure time.");
+        }
+        if(flight.getDepartureCity().equalsIgnoreCase(flight.getArrivalCity())){
+            throw new RuntimeException("Arrival city has to be different from departure city.");
+        }
         return flightRepository.save(flight);
     }
 

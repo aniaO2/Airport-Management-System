@@ -23,9 +23,14 @@ public class BookingService {
     @Autowired
     private PassengerRepository passengerRepository;
 
-    public Booking createBooking(int flightId, int passengerId){
+    public Booking createBooking(Integer flightId, Integer passengerId){
         Flight flight = flightRepository.findById(flightId)
                 .orElseThrow(() -> new RuntimeException("Flight not found"));
+        long currentBookings = bookingRepository.findAll().stream()
+                .filter(b -> b.getFlight().getFlightId().equals(flightId)).count();
+        if(currentBookings >= flight.getAircraft().getCapacity()){
+            throw new RuntimeException("The aircraft is fully booked.");
+        }
         Passenger passenger = passengerRepository.findById(passengerId)
                 .orElseThrow(() -> new RuntimeException("Passenger not found"));
         Booking booking = new Booking();

@@ -11,7 +11,7 @@ import lombok.Data;
 public class Gate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer gateId;
 
     @NotBlank(message = "Gate number is mandatory")
     private String gateNo;

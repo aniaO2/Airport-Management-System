@@ -12,7 +12,7 @@ import lombok.Data;
 public class Passenger {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer passengerId;
 
     @NotBlank(message = "Full name is mandatory")
     private String fullName;

@@ -5,6 +5,7 @@ import com.airport.airportmanagementsystem.repository.FlightRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -43,5 +44,13 @@ public class FlightService {
         return flightRepository.findAll().stream()
                 .filter(f -> f.getArrivalCity().equalsIgnoreCase(city))
                 .toList();
+    }
+
+    public void validateGateAllocation(Flight flight){
+        LocalDateTime now = LocalDateTime.now();
+        long minutesUntilDeparture = java.time.Duration.between(now, flight.getDepartureTime()).toMinutes();
+        if(minutesUntilDeparture <= 40 && flight.getGate() == null) {
+            throw new RuntimeException("Gate allocation is mandatory 40 minutes before flight.");
+        }
     }
 }

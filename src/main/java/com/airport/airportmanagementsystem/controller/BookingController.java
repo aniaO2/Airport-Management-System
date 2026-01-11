@@ -13,7 +13,7 @@ public class BookingController {
     private BookingService bookingService;
 
     @PostMapping
-    public Booking create(@RequestParam int flightId, @RequestParam int passengerId){
-        return bookingService.createBooking(flightId, passengerId);
+    public Booking create(@RequestParam int flightId, @RequestParam String passportNo){
+        return bookingService.createBooking(flightId, passportNo);
     }
 }

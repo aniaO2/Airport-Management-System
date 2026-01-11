@@ -13,6 +13,9 @@ public class PassengerService {
     private PassengerRepository passengerRepository;
 
     public Passenger savePassenger(Passenger passenger){
+        if(passengerRepository.existsByPassportNo(passenger.getPassportNo())){
+            throw new RuntimeException("This passenger has already been registered.");
+        }
         return passengerRepository.save(passenger);
     }
 

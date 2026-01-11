@@ -28,7 +28,7 @@ public class BookingService {
     @Autowired
     private SeatRepository seatRepository;
 
-    public Booking createBooking(Integer flightId, Integer passengerId){
+    public Booking createBooking(Integer flightId, String passportNo){
         Flight flight = flightRepository.findById(flightId)
                 .orElseThrow(() -> new RuntimeException("Flight not found"));
 
@@ -37,7 +37,7 @@ public class BookingService {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("The flight is fully booked"));
 
-        Passenger passenger = passengerRepository.findById(passengerId)
+        Passenger passenger = passengerRepository.findByPassportNo(passportNo)
                 .orElseThrow(() -> new RuntimeException("Passenger not found"));
 
         availableSeat.setAvailable(false);
@@ -46,7 +46,11 @@ public class BookingService {
         Booking booking = new Booking();
         booking.setFlight(flight);
         booking.setPassenger(passenger);
-        booking.setBookingNo(UUID.randomUUID().toString());
+        String code;
+        do {
+            code = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        } while (bookingRepository.existsByBookingNo(code));
+        booking.setBookingNo(code);
         return bookingRepository.save(booking);
     }
 }

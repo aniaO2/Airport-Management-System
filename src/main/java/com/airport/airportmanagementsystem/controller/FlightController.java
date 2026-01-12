@@ -25,15 +25,15 @@ public class FlightController {
         return flightService.saveFlight(flight);
     }
 
-    @GetMapping("/{id}")
-    public Flight getById(@PathVariable Integer id){
-        return flightService.getFlightById(id);
+    @GetMapping("/{flightNo}")
+    public Flight getByNo(@PathVariable String flightNo){
+        return flightService.getFlightByNo(flightNo);
     }
 
-    @DeleteMapping("/{id}")
-    public String delete(@PathVariable Integer id){
-        flightService.deleteFlight(id);
-        return "Flight with id" + id + "was deleted successfully.";
+    @DeleteMapping("/{flightNo}")
+    public String delete(@PathVariable String flightNo){
+        flightService.deleteFlight(flightNo);
+        return "Flight with no." + flightNo + "was deleted successfully.";
     }
 
     @GetMapping("/search")

@@ -1,7 +1,7 @@
 package com.airport.airportmanagementsystem.controller;
 
 import com.airport.airportmanagementsystem.model.Passenger;
-import com.airport.airportmanagementsystem.repository.PassengerRepository;
+import com.airport.airportmanagementsystem.service.PassengerService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,15 +12,15 @@ import java.util.List;
 public class PassengerController {
 
     @Autowired
-    private PassengerRepository passengerRepository;
+    private PassengerService passengerService;
 
     @GetMapping
     public List<Passenger> getAll(){
-        return passengerRepository.findAll();
+        return passengerService.getAllPassengers();
     }
 
     @PostMapping
     public Passenger create(@Valid @RequestBody Passenger passenger){
-        return passengerRepository.save(passenger);
+        return passengerService.savePassenger(passenger);
     }
 }

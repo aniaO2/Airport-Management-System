@@ -10,7 +10,9 @@ import com.airport.airportmanagementsystem.repository.PassengerRepository;
 import com.airport.airportmanagementsystem.repository.SeatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -28,11 +30,11 @@ public class BookingService {
     @Autowired
     private SeatRepository seatRepository;
 
-    public Booking createBooking(Integer flightId, String passportNo){
-        Flight flight = flightRepository.findById(flightId)
+    public Booking createBooking(String flightNo, String passportNo){
+        Flight flight = flightRepository.findByFlightNo(flightNo)
                 .orElseThrow(() -> new RuntimeException("Flight not found"));
 
-        Seat availableSeat = seatRepository.findByFlightIdAndAvailability(flightId)
+        Seat availableSeat = seatRepository.findByFlightNoAndAvailability(flightNo)
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("The flight is fully booked"));
@@ -52,5 +54,21 @@ public class BookingService {
         } while (bookingRepository.existsByBookingNo(code));
         booking.setBookingNo(code);
         return bookingRepository.save(booking);
+    }
+
+    public List<Booking> getBookingsByPassenger(String passportNo){
+        return bookingRepository.findByPassenger_PassportNo(passportNo);
+    }
+
+    @Transactional
+    public void cancelBooking(Integer bookingId){
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+        if(booking.getSeat() != null){
+            Seat seat = booking.getSeat();
+            seat.setAvailable(true);
+            seatRepository.save(seat);
+        }
+        bookingRepository.delete(booking);
     }
 }

@@ -25,6 +25,10 @@ public class Booking {
     @JoinColumn(name = "passenger_id")
     private Passenger passenger;
 
+    @OneToOne
+    @JoinColumn(name = "seat_id")
+    private Seat seat;
+
     @PastOrPresent
     private LocalDateTime bookingDate;
 }

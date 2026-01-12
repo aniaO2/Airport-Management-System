@@ -14,6 +14,7 @@ public class Gate {
     private Integer gateId;
 
     @NotBlank(message = "Gate number is mandatory")
+    @Column(unique = true)
     private String gateNo;
 
     private String terminal;

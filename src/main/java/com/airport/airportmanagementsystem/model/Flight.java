@@ -15,6 +15,7 @@ public class Flight {
     private Integer flightId;
 
     @NotBlank(message = "The flight no. is mandatory")
+    @Column(unique = true)
     private String flightNo;
 
     @Future(message = "Departure time should be in the future")
@@ -30,10 +31,10 @@ public class Flight {
     private String arrivalCity;
 
     @ManyToOne
-    @JoinColumn(name = "aircraft_id", nullable = false)
+    @JoinColumn(name = "aircraft_no", nullable = false, referencedColumnName = "planeNo")
     private Aircraft aircraft;
 
     @ManyToOne
-    @JoinColumn(name = "gate_id")
+    @JoinColumn(name = "gate_no", referencedColumnName = "gateNo")
     private Gate gate;
 }

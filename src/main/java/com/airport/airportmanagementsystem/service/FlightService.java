@@ -1,9 +1,16 @@
 package com.airport.airportmanagementsystem.service;
 
+import com.airport.airportmanagementsystem.model.Booking;
 import com.airport.airportmanagementsystem.model.Flight;
+import com.airport.airportmanagementsystem.model.Gate;
+import com.airport.airportmanagementsystem.model.Seat;
+import com.airport.airportmanagementsystem.repository.BookingRepository;
 import com.airport.airportmanagementsystem.repository.FlightRepository;
+import com.airport.airportmanagementsystem.repository.GateRepository;
+import com.airport.airportmanagementsystem.repository.SeatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,6 +21,15 @@ public class FlightService {
     @Autowired
     private FlightRepository flightRepository;
 
+    @Autowired
+    private GateRepository gateRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
+
+    @Autowired
+    private SeatRepository seatRepository;
+
     public Flight saveFlight(Flight flight){
         if(flight.getArrivalTime().isBefore(flight.getDepartureTime())){
             throw new RuntimeException("Arrival time has to be after departure time.");
@@ -21,6 +37,11 @@ public class FlightService {
         if(flight.getDepartureCity().equalsIgnoreCase(flight.getArrivalCity())){
             throw new RuntimeException("Arrival city has to be different from departure city.");
         }
+        if(flight.getGate() == null){
+            Gate autoGate = findAvailableGate(flight.getDepartureTime());
+            flight.setGate(autoGate);
+        }
+        validateGateAllocation(flight);
         return flightRepository.save(flight);
     }
 
@@ -28,16 +49,26 @@ public class FlightService {
         return flightRepository.findAll();
     }
 
-    public Flight getFlightById(Integer id){
-        return flightRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Flight with id " + id + " not found"));
+    public Flight getFlightByNo(String flightNo){
+        return flightRepository.findByFlightNo(flightNo)
+                .orElseThrow(() -> new RuntimeException("Flight with no. " + flightNo + " not found"));
     }
 
-    public void deleteFlight(Integer id){
-        if(!flightRepository.existsById(id)){
-            throw new RuntimeException("Flight not found, cannot delete.");
+    @Transactional
+    public void deleteFlight(String flightNo){
+        Flight flight = flightRepository.findByFlightNo(flightNo)
+                .orElseThrow(() -> new RuntimeException("Flight not found, cannot delete."));
+
+        List<Booking> flightBookings = bookingRepository.findByFlight_FlightNo(flightNo);
+        for (Booking b : flightBookings){
+            if(b.getSeat() != null){
+                Seat seat = b.getSeat();
+                seat.setAvailable(true);
+                seatRepository.save(seat);
+            }
         }
-        flightRepository.deleteById(id);
+        bookingRepository.deleteAll(flightBookings);
+        flightRepository.delete(flight);
     }
 
     public List<Flight> findByDestination(String city){
@@ -52,5 +83,25 @@ public class FlightService {
         if(minutesUntilDeparture <= 40 && flight.getGate() == null) {
             throw new RuntimeException("Gate allocation is mandatory 40 minutes before flight.");
         }
+    }
+
+    public Gate findAvailableGate(LocalDateTime departureTime){
+        List<Gate> allGates = gateRepository.findAll();
+        List<Flight> allFlights = flightRepository.findAll();
+
+        for(Gate gate : allGates){
+            boolean isOccupied = allFlights.stream()
+                    .filter(f -> f.getGate() != null && f.getGate().getGateId().equals(gate.getGateId()))
+                    .anyMatch(f -> {
+                        LocalDateTime gateOccupiedStart = f.getDepartureTime().minusMinutes(60);
+                        LocalDateTime gateOccupiedEnd = f.getDepartureTime().plusMinutes(20);
+
+                        return departureTime.isAfter(gateOccupiedStart) && departureTime.isBefore(gateOccupiedEnd);
+                    });
+            if(!isOccupied){
+                return gate;
+            }
+        }
+        throw new RuntimeException("No available gates.");
     }
 }

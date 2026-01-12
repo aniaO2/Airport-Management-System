@@ -17,14 +17,4 @@ public class SeatService {
                 .filter(seat -> seat.getFlight().getFlightId().equals(flightId))
                 .toList();
     }
-
-    public void occupySeat(Integer seatId){
-        Seat seat = seatRepository.findById(seatId)
-                .orElseThrow(() -> new RuntimeException("Seat not found"));
-        if(!seat.isAvailable()){
-            throw new RuntimeException("Seat is already booked.");
-        }
-        seat.setAvailable(false);
-        seatRepository.save(seat);
-    }
 }

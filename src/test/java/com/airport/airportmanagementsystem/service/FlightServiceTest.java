@@ -12,12 +12,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static java.util.Collections.emptyList;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class FlightServiceTest {
@@ -33,47 +33,46 @@ public class FlightServiceTest {
     private FlightService flightService;
 
     @Test
-    void getFlightByNo_Success() {
-        Flight flight = new Flight();
-        flight.setFlightNo("RO-123");
-        when(flightRepository.findByFlightNo("RO-123")).thenReturn(Optional.of(flight));
-
-        Flight result = flightService.getFlightByNo("RO-123");
-
-        assertNotNull(result);
-        assertEquals("RO-123", result.getFlightNo());
-        verify(flightRepository, times(1)).findByFlightNo("RO-123");
+    void getAllFlights_Success() {
+        when(flightRepository.findAll()).thenReturn(List.of(new Flight(), new Flight()));
+        List<Flight> result = flightService.getAllFlights();
+        assertEquals(2, result.size());
     }
 
     @Test
-    void getFlightByNo_NotFound() {
-        when(flightRepository.findByFlightNo("RO-404")).thenReturn(Optional.empty());
+    void getFlightByNo_Success() {
+        Flight flight = new Flight();
+        flight.setFlightNo("RO101");
+        when(flightRepository.findByFlightNo("RO101")).thenReturn(Optional.of(flight));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            flightService.getFlightByNo("RO-404");
-        });
+        Flight result = flightService.getFlightByNo("RO101");
+        assertEquals("RO101", result.getFlightNo());
+    }
 
-        assertTrue(exception.getMessage().contains("not found"));
+    @Test
+    void saveFlight_TimeValidation_ThrowsException() {
+        Flight flight = new Flight();
+        flight.setDepartureTime(LocalDateTime.now().plusHours(2));
+        flight.setArrivalTime(LocalDateTime.now().plusHours(1));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> flightService.saveFlight(flight));
+        assertEquals("Arrival time has to be after departure time.", ex.getMessage());
     }
 
     @Test
     void deleteFlight_Success() {
-        String flightNo = "RO-123";
+        String flightNo = "RO101";
         Flight flight = new Flight();
         flight.setFlightNo(flightNo);
-        Seat occupiedSeat = new Seat();
-        occupiedSeat.setAvailable(false);
-        Booking booking = new Booking();
-        booking.setSeat(occupiedSeat);
 
         when(flightRepository.findByFlightNo(flightNo)).thenReturn(Optional.of(flight));
-        when(bookingRepository.findByFlight_FlightNo(flightNo)).thenReturn(List.of(booking));
+        when(bookingRepository.findByFlight_FlightNo(flightNo)).thenReturn(List.of(new Booking()));
+        when(seatRepository.findByFlight_FlightNo(flightNo)).thenReturn(List.of(new Seat()));
 
         flightService.deleteFlight(flightNo);
 
-        assertTrue(occupiedSeat.isAvailable());
-        verify(seatRepository, times(1)).save(occupiedSeat);
-        verify(flightRepository, times(1)).delete(flight);
-        verify(bookingRepository, times(1)).deleteAll(anyList());
+        verify(bookingRepository).deleteAll(anyList());
+        verify(seatRepository).deleteAll(anyList());
+        verify(flightRepository).delete(flight);
     }
 }

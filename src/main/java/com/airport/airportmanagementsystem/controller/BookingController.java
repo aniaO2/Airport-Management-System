@@ -1,5 +1,6 @@
 package com.airport.airportmanagementsystem.controller;
 
+import com.airport.airportmanagementsystem.dto.BookingResponseDTO;
 import com.airport.airportmanagementsystem.model.Booking;
 import com.airport.airportmanagementsystem.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ public class BookingController {
     private BookingService bookingService;
 
     @PostMapping
-    public Booking create(@RequestParam String flightNo, @RequestParam String passportNo){
+    public BookingResponseDTO create(@RequestParam String flightNo, @RequestParam String passportNo){
         return bookingService.createBooking(flightNo, passportNo);
     }
 

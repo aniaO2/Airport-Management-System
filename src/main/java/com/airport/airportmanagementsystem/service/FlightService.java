@@ -37,11 +37,11 @@ public class FlightService {
         if(flight.getDepartureCity().equalsIgnoreCase(flight.getArrivalCity())){
             throw new RuntimeException("Arrival city has to be different from departure city.");
         }
-        if(flight.getGate() == null){
+        validateGateAllocation(flight);
+        if(flight.getGate() == null) {
             Gate autoGate = findAvailableGate(flight.getDepartureTime());
             flight.setGate(autoGate);
         }
-        validateGateAllocation(flight);
         return flightRepository.save(flight);
     }
 
@@ -55,19 +55,19 @@ public class FlightService {
     }
 
     @Transactional
-    public void deleteFlight(String flightNo){
+    public void deleteFlight(String flightNo) {
         Flight flight = flightRepository.findByFlightNo(flightNo)
-                .orElseThrow(() -> new RuntimeException("Flight not found, cannot delete."));
+                .orElseThrow(() -> new RuntimeException("Flight not found."));
 
         List<Booking> flightBookings = bookingRepository.findByFlight_FlightNo(flightNo);
-        for (Booking b : flightBookings){
-            if(b.getSeat() != null){
-                Seat seat = b.getSeat();
-                seat.setAvailable(true);
-                seatRepository.save(seat);
-            }
-        }
         bookingRepository.deleteAll(flightBookings);
+
+        List<Seat> flightSeats = seatRepository.findByFlight_FlightNo(flightNo);
+        seatRepository.deleteAll(flightSeats);
+
+        bookingRepository.flush();
+        seatRepository.flush();
+
         flightRepository.delete(flight);
     }
 

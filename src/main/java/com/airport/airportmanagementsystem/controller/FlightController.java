@@ -33,7 +33,7 @@ public class FlightController {
     @DeleteMapping("/{flightNo}")
     public String delete(@PathVariable String flightNo){
         flightService.deleteFlight(flightNo);
-        return "Flight with no." + flightNo + "was deleted successfully.";
+        return "Flight with no." + flightNo + " was deleted successfully.";
     }
 
     @GetMapping("/search")

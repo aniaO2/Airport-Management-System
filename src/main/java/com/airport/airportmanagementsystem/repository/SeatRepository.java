@@ -7,5 +7,6 @@ import java.util.List;
 
 @Repository
 public interface SeatRepository extends JpaRepository<Seat, Integer> {
-    List<Seat> findByFlightNoAndAvailability(String flightNo);
+    List<Seat> findByFlight_FlightNoAndIsAvailableTrue(String flightNo);
+    List<Seat> findByFlight_FlightNo(String flightNo);
 }

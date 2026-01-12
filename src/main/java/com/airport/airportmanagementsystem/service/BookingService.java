@@ -1,5 +1,6 @@
 package com.airport.airportmanagementsystem.service;
 
+import com.airport.airportmanagementsystem.dto.BookingResponseDTO;
 import com.airport.airportmanagementsystem.model.Booking;
 import com.airport.airportmanagementsystem.model.Flight;
 import com.airport.airportmanagementsystem.model.Passenger;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,17 +32,25 @@ public class BookingService {
     @Autowired
     private SeatRepository seatRepository;
 
-    public Booking createBooking(String flightNo, String passportNo){
+    public BookingResponseDTO createBooking(String flightNo, String passportNo){
         Flight flight = flightRepository.findByFlightNo(flightNo)
                 .orElseThrow(() -> new RuntimeException("Flight not found"));
 
-        Seat availableSeat = seatRepository.findByFlightNoAndAvailability(flightNo)
+        Passenger passenger = passengerRepository.findByPassportNo(passportNo)
+                .orElseThrow(() -> new RuntimeException("Passenger not found"));
+
+        boolean alreadyBooked = bookingRepository.findAll().stream()
+                .anyMatch(b -> b.getFlight().getFlightNo().equals(flightNo)
+                            && b.getPassenger().getPassportNo().equals(passportNo));
+        if(alreadyBooked){
+            throw new RuntimeException("Passenger already booked this flight.");
+        }
+
+        Seat availableSeat = seatRepository.findByFlight_FlightNoAndIsAvailableTrue(flightNo)
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("The flight is fully booked"));
 
-        Passenger passenger = passengerRepository.findByPassportNo(passportNo)
-                .orElseThrow(() -> new RuntimeException("Passenger not found"));
 
         availableSeat.setAvailable(false);
         seatRepository.save(availableSeat);
@@ -48,12 +58,16 @@ public class BookingService {
         Booking booking = new Booking();
         booking.setFlight(flight);
         booking.setPassenger(passenger);
+        booking.setSeat(availableSeat);
+        booking.setBookingDate(LocalDateTime.now());
+
         String code;
         do {
             code = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         } while (bookingRepository.existsByBookingNo(code));
         booking.setBookingNo(code);
-        return bookingRepository.save(booking);
+        Booking savedBooking = bookingRepository.save(booking);
+        return convertToDTO(savedBooking);
     }
 
     public List<Booking> getBookingsByPassenger(String passportNo){
@@ -70,5 +84,14 @@ public class BookingService {
             seatRepository.save(seat);
         }
         bookingRepository.delete(booking);
+    }
+    private BookingResponseDTO convertToDTO(Booking booking) {
+        BookingResponseDTO dto = new BookingResponseDTO();
+        dto.setBookingNo(booking.getBookingNo());
+        dto.setFlightNo(booking.getFlight().getFlightNo());
+        dto.setPassengerName(booking.getPassenger().getFullName());
+        dto.setSeatNo(booking.getSeat().getSeatNo());
+        dto.setDepartureTime(booking.getFlight().getDepartureTime());
+        return dto;
     }
 }

@@ -2,7 +2,6 @@ package com.airport.airportmanagementsystem.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PastOrPresent;
 import lombok.Data;
 import java.time.LocalDateTime;
 
@@ -29,6 +28,5 @@ public class Booking {
     @JoinColumn(name = "seat_id")
     private Seat seat;
 
-    @PastOrPresent
     private LocalDateTime bookingDate;
 }

@@ -31,10 +31,10 @@ public class Flight {
     private String arrivalCity;
 
     @ManyToOne
-    @JoinColumn(name = "aircraft_no", nullable = false, referencedColumnName = "planeNo")
+    @JoinColumn(name = "aircraft_id", nullable = false)
     private Aircraft aircraft;
 
     @ManyToOne
-    @JoinColumn(name = "gate_no", referencedColumnName = "gateNo")
+    @JoinColumn(name = "gate_id")
     private Gate gate;
 }
